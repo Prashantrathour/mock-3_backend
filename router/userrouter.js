@@ -5,17 +5,18 @@ const userrrouter = express.Router();
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
-const blacklistmodel = require("../model/blacklist.model");
-const auth = require("../middleware/Auth");
+
+
 require("dotenv").config();
-userrrouter.post("/register", (req, res) => {
-  const { email, name, password } = req.body;
+userrrouter.post("/signup", (req, res) => {
+  const { email, name,confirmPassword, password } = req.body;
+  console.log(req.body)
   try {
     bcrypt.hash(password, 5, async (err, hash) => {
       if (err) {
         res.status(404).send({ error: err.message });
       } else {
-        const user = { email: email, password: hash, name: name };
+        const user = { email: email,confirmPassword, password: hash, name: name };
         try {
           const newuser = new User(user);
           await newuser.save();
@@ -59,36 +60,6 @@ userrrouter.post("/login", async (req, res) => {
     res.status(403).json({ message });
   }
 });
-userrrouter.get("/logout", auth, async(req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (token) {
-    try {
-      const block=await blacklistmodel.findById("6486aa5b59aeb2ae81d2a6ca")
-       block.token.push(token);
-       const check=await blacklistmodel.findByIdAndUpdate("6486aa5b59aeb2ae81d2a6ca",{token:block.token})
-      
-   
-      res.json({ msg: "logout" });
-    } catch (error) {
-      res.status(404).json({ error: error });
-    }
-  } else {
-    res.status(404).json({ error: "enter token" });
-  }
-});
-userrrouter.get("/", auth, async(req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (token) {
-    try {
-      const user = await User.find({});
-  
-      res.json({ user:user});
-    } catch (error) {
-      res.status(404).json({ error: error });
-    }
-  } else {
-    res.status(404).json({ error: "enter token" });
-  }
-});
+
 
 module.exports = userrrouter;
